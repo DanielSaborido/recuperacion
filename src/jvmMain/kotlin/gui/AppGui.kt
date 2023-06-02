@@ -16,16 +16,17 @@ import androidx.compose.ui.window.AwtWindow
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import java.awt.FileDialog
 import java.awt.Frame
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import javax.swing.JDialog
+import javax.swing.JFileChooser
 
 internal fun AppGui() = application {
-    val titleWindowIni = "Procesa archivo: "
+    val titleWindowIni = "Notas del curso: "
     var isDirectoryChooserOpen by remember { mutableStateOf(false) } //Indica que se quiere abrir el FileChooser
     var titleWindow by remember { mutableStateOf(titleWindowIni) } //Titulo de la ventana
     var directoryPath by remember { mutableStateOf("") } //Path al fichero que se está procesando
@@ -50,7 +51,7 @@ internal fun AppGui() = application {
             isDirectoryChooserOpen,
             directoryPath = directoryPath,
             onCloseDirectoryChooser = { directory: String? -> //Cuando se elige en archivo.
-                //textProcesed = PicturesRenamerHelper.ProcessPictureNames("$directory")//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
+               println(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
             },
             onClickSelectDirectory = { isDirectoryChooserOpen = true },
             textProcesed
@@ -112,7 +113,7 @@ internal fun FrameWindow(
                             focusedIndicatorColor = Color.Transparent,
                             cursorColor = Color(0xFF120524),
                         ),
-                        readOnly = false,
+                        readOnly = false
                     )
                     Space()
                     TextField( // Campo de texto que contiene el texto en el que se vuelcan los resultados
@@ -122,7 +123,7 @@ internal fun FrameWindow(
                         placeholder = { Text("No obtenido resultados") },
                         modifier = Modifier.padding(top = 100.dp)
                             .fillMaxSize().width(500.dp).height(250.dp),
-                        readOnly = false,
+                        readOnly = false
                     )
                 }
             }
@@ -136,16 +137,22 @@ internal fun DirectoryChooser(
     onCloseDirectoryChooser: (directory: String?) -> Unit
 ) = AwtWindow(
     create = {
-        object : FileDialog(parent, "Elige la carpeta con los csv", LOAD) {
+        object : JDialog(parent, "Elige la carpeta con los csv", true) {
             override fun setVisible(value: Boolean) {
-                super.setVisible(value)
-                if (value) {
-                    onCloseDirectoryChooser(directory)
+                val fileChooser = JFileChooser()
+                fileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                val result = fileChooser.showDialog(this, "Seleccionar")
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    val selectedFile = fileChooser.selectedFile
+                    onCloseDirectoryChooser(selectedFile.absolutePath)
+                } else {
+                    onCloseDirectoryChooser(null)
                 }
+                dispose()
             }
         }
     },
-    dispose = FileDialog::dispose
+    dispose = JDialog::dispose
 )
 
 
