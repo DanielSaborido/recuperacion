@@ -1,5 +1,10 @@
+package gui
+
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
@@ -17,12 +22,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 
 internal fun AppGui() = application {
     val titleWindowIni = "Procesa archivo: "
-    var isFileChooserOpen by remember { mutableStateOf(false) } //Indica que se quiere abrir el FileChooser
+    var isDirectoryChooserOpen by remember { mutableStateOf(false) } //Indica que se quiere abrir el FileChooser
     var titleWindow by remember { mutableStateOf(titleWindowIni) } //Titulo de la ventana
-    var filePath by remember { mutableStateOf("") } //Path al fichero que se está procesando
+    var directoryPath by remember { mutableStateOf("") } //Path al fichero que se está procesando
     var isActiveProcess by remember { mutableStateOf(false) } //Activar o desactivar el menuItem  procesar
     var textProcesed by remember { mutableStateOf("") } //El texto a poner en el campo de procesado.
 
@@ -34,75 +40,68 @@ internal fun AppGui() = application {
         //MenuBar de la ventana
         MenuBar {
             Menu("Archivo") {
-                Item("Abrir", onClick = { isFileChooserOpen = true })
-                // TODO: añade aquí el código necesario para procesar y tener el menuItem activo o desactivado según se requiera)
+                Item("Abrir", onClick = { isDirectoryChooserOpen = true })
                 Item("Procesar", onClick = { isActiveProcess = true })
                 Item("Salir", onClick = ::exitApplication)
             }
         }
         //El resto de la ventana
         FrameWindow(
-            isFileChooserOpen,
-            filePath = filePath,
-            onCloseFileChooser = { directory: String?, fileName: String? -> //Cuando se elige en archivo.
-                textProcesed = PicturesRenamerHelper.ProcessPictureNames("$directory/$fileName")
+            isDirectoryChooserOpen,
+            directoryPath = directoryPath,
+            onCloseDirectoryChooser = { directory: String? -> //Cuando se elige en archivo.
+                //textProcesed = PicturesRenamerHelper.ProcessPictureNames("$directory")//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
             },
-            onClickSelectFile = { isFileChooserOpen = true },
+            onClickSelectDirectory = { isDirectoryChooserOpen = true },
             textProcesed
         )
     }
-
 }
 
-/**
- * TODO
- *
- * @param isFileChooserOpen Si se ha elegido abrir el FileChooser
- * @param filePath El path al archivo
- * @param onCloseFileChooser Evento que se lanza cuando se cierra el FileChooser. Devuelve el path y nombre del archivo seleccionado. Null si no se cancelo.
- * @param onClickSelectFile Evento al pulsar sobre el botón Abrir
- * @param textProcesed El texto que con tiene los resultados, se vuelcan en el textField que contiene los resultados
- */
 @Composable
 internal fun FrameWindow(
-    isFileChooserOpen: Boolean = false,
-    filePath: String = "",
-    onCloseFileChooser: (directory: String?, file: String?) -> Unit,
-    onClickSelectFile: () -> Unit,
+    isDirectoryChooserOpen: Boolean = false,
+    directoryPath: String = "",
+    onCloseDirectoryChooser: (directory: String?) -> Unit,
+    onClickSelectDirectory: () -> Unit,
     textProcesed: String
 ) {
     MaterialTheme {
-        if (isFileChooserOpen)
-            FileChooser(onCloseFileChooser = onCloseFileChooser)
-
-
+        if (isDirectoryChooserOpen)
+            DirectoryChooser(onCloseDirectoryChooser = onCloseDirectoryChooser)
         Box(
             modifier = Modifier.fillMaxSize()
                 .background(color = Color(180, 180, 180))
                 .padding(10.dp)
         )
         {
+            Column {
+                // La barra de Informacion de la Aplicacion
+                TopAppBar(
+                    title = { Text("Notas del curso") }
+                )
+                val stateVertical = rememberScrollState(0)
+                val stateHorizontal = rememberScrollState(0)
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(end = 12.dp, bottom = 12.dp)
-
-            ) {
-                Column {
-
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(stateVertical)
+                        .horizontalScroll(stateHorizontal),
+                    contentAlignment = Alignment.TopCenter
+                ){
                     TextField( // Contiene el path+nombre del fichero leido
-                        value = filePath,
+                        value = directoryPath,
                         onValueChange = { },
-                        label = { Text("Seleccione un archivo:") },
-                        placeholder = { Text("Archivo no seleccionado") },
-                        modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp)
-                            .fillMaxWidth(),
+                        label = { Text("Seleccione la carpeta con los csv") },
+                        placeholder = { Text("Carpeta no seleccionada") },
+                        modifier = Modifier.padding(top = 10.dp, bottom = 100.dp)
+                            .fillMaxSize().width(500.dp).fillMaxHeight(),
                         leadingIcon = { //Icono del lapiz que funciona igual que la opción del menuItem Abrir
-                            IconButton(onClick = onClickSelectFile) {
+                            IconButton(onClick = onClickSelectDirectory) {
                                 Icon(
                                     imageVector = Icons.Filled.Create,
-                                    contentDescription = "Seleccione un archivo"
+                                    contentDescription = "Seleccione la carpeta con los csv"
                                 )
                             }
                         },
@@ -121,53 +120,27 @@ internal fun FrameWindow(
                         onValueChange = { },
                         label = { Text("Resultado") },
                         placeholder = { Text("No obtenido resultados") },
-                        modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp)
-                            .fillMaxSize().width(300.dp)
-                            .height(200.dp),
+                        modifier = Modifier.padding(top = 100.dp)
+                            .fillMaxSize().width(500.dp).height(250.dp),
                         readOnly = false,
-
-                        )
-                }
-
-            }
-
-            // TODO: Añade el botón para exportar
-            Space()
-            Row(
-                modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth()
-
-            ) {
-                Button(onClick = {
-                    PicturesRenamerHelper.ProcessPictureNames(filePath)//fileToProcess y ScripFinal no estan declaradas
-                }) {
-                    Text("Exportar Script")
+                    )
                 }
             }
-
         }
     }
 }
 
-/**
- * TODO
- *
- * @param parent
- * @param onCloseFileChooser Evento que se lanza cuando se cierra FileChooer.
- * Devuelve directory en el que se encuentra el fichero y file el nombre del fichero.
- */
 @Composable
-internal fun FileChooser(
+internal fun DirectoryChooser(
     parent: Frame? = null,
-    onCloseFileChooser: (directory: String?, file: String?) -> Unit
+    onCloseDirectoryChooser: (directory: String?) -> Unit
 ) = AwtWindow(
     create = {
-        object : FileDialog(parent, "Choose a file", LOAD) {
+        object : FileDialog(parent, "Elige la carpeta con los csv", LOAD) {
             override fun setVisible(value: Boolean) {
                 super.setVisible(value)
                 if (value) {
-                    onCloseFileChooser(directory, file)
+                    onCloseDirectoryChooser(directory)
                 }
             }
         }
