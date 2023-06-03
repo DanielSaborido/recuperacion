@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -17,13 +18,10 @@ import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import java.awt.Frame
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import javax.swing.JDialog
 import javax.swing.JFileChooser
+import OpArchivos
+import java.io.File
 
 internal fun AppGui() = application {
     val titleWindowIni = "Notas del curso: "
@@ -32,6 +30,7 @@ internal fun AppGui() = application {
     var directoryPath by remember { mutableStateOf("") } //Path al fichero que se está procesando
     var isActiveProcess by remember { mutableStateOf(false) } //Activar o desactivar el menuItem  procesar
     var textProcesed by remember { mutableStateOf("") } //El texto a poner en el campo de procesado.
+    var folderContent by remember { mutableStateOf(emptyList<(File)>()) }
 
     //Ventana principal.
     Window(
@@ -51,7 +50,10 @@ internal fun AppGui() = application {
             isDirectoryChooserOpen,
             directoryPath = directoryPath,
             onCloseDirectoryChooser = { directory: String? -> //Cuando se elige en archivo.
-               println(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
+                folderContent = OpArchivos.indexCarpeta(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
+                folderContent.forEach{s ->
+                        println(s.name)
+                }
             },
             onClickSelectDirectory = { isDirectoryChooserOpen = true },
             textProcesed
