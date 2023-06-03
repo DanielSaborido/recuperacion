@@ -30,7 +30,7 @@ internal fun AppGui() = application {
     var directoryPath by remember { mutableStateOf("") } //Path al fichero que se está procesando
     var isActiveProcess by remember { mutableStateOf(false) } //Activar o desactivar el menuItem  procesar
     var textProcesed by remember { mutableStateOf("") } //El texto a poner en el campo de procesado.
-    var folderContent by remember { mutableStateOf(emptyList<(File)>()) }
+    var folderContent by remember { mutableStateOf(emptyList<(Any)>()) }
 
     //Ventana principal.
     Window(
@@ -50,11 +50,13 @@ internal fun AppGui() = application {
             isDirectoryChooserOpen,
             directoryPath = directoryPath,
             onCloseDirectoryChooser = { directory: String? -> //Cuando se elige en archivo.
-                folderContent = OpArchivos.indexCarpeta(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
-                folderContent.forEach{file ->
-                        println(file.name)
-                    textProcesed+="${file.name}\n"
-                }
+                folderContent = OpArchivos.calcPromedios(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
+                textProcesed+="Promedio de número hasta primera linea: ${folderContent[0]}\n" +
+                        "Promedio de número hasta bingo [${folderContent[1]}]\n" +
+                        "Promedio de Lineas por partida [${folderContent[2]}]\n" +
+                        "Carton con mas Bingos cantados [${folderContent[3]}]\n" +
+                        "Carton con mas Lineas cantadas [${folderContent[4]}]"
+                println(textProcesed)
             },
             onClickSelectDirectory = { isDirectoryChooserOpen = true },
             textProcesed

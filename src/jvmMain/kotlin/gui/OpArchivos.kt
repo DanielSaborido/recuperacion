@@ -3,38 +3,21 @@ import java.io.File
 object OpArchivos {
 
     fun indexCarpeta(directory: String?): List<File> {
-        val archivosLog = mutableListOf<File>()
+        val archivos = mutableListOf<File>()
         val carpetaPrincipal = File("$directory")
 
         carpetaPrincipal.walk().forEach {
             if (it.isFile /*&& it.extension == "csv"*/) {
-                archivosLog.add(it)
+                archivos.add(it)
             }
         }
 
-        return archivosLog
+        return archivos
     }
 
-    fun indexArchivos (nombre: String): List<File> {
+    fun calcPromedios(directory: String?): MutableList<Any> {
 
-        val folder = File("logs/$nombre")
-        val files = mutableListOf<File>()
-
-        if (folder.exists() && folder.isDirectory) {
-            folder.listFiles()?.forEach {
-                if (it.isFile) {
-                    files.add(it)
-                }
-            }
-        }
-
-        return files
-
-    }
-
-    fun calcPromedios(): MutableList<Any> {
-
-        val archivos = indexCarpeta("notas")
+        val archivos = indexCarpeta("$directory")
 
         // Expresiones Regulares
         val regexNumeros = """############################### Ha salido la bola ([0-9]*)""".toRegex()
