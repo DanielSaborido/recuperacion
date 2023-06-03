@@ -51,8 +51,9 @@ internal fun AppGui() = application {
             directoryPath = directoryPath,
             onCloseDirectoryChooser = { directory: String? -> //Cuando se elige en archivo.
                 folderContent = OpArchivos.indexCarpeta(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
-                folderContent.forEach{s ->
-                        println(s.name)
+                folderContent.forEach{file ->
+                        println(file.name)
+                    textProcesed+="${file.name}\n"
                 }
             },
             onClickSelectDirectory = { isDirectoryChooserOpen = true },
