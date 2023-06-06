@@ -17,5 +17,8 @@ fun main() {
     println( csvHandler.readCSV().toString() )
     lectura.forEach { it->
         println(it)
+        it.forEach { it->
+            println(it)
+        }
     }
 }

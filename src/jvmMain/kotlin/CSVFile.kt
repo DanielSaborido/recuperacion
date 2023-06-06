@@ -10,12 +10,35 @@ class CSVFileHandler(private val filePath: String) {
         BufferedReader(FileReader(filePath)).use { reader ->
             var line = reader.readLine()
             while (line != null) {
-                val row = line.split(",").toMutableList()
+                val row = parseCSVLine(line)
                 data.add(row)
                 line = reader.readLine()
             }
         }
         return data
+    }
+
+    private fun parseCSVLine(line: String): MutableList<String> {
+        val row = mutableListOf<String>()
+        val builder = StringBuilder()
+        var insideQuotes = false
+
+        for (i in line.indices) {
+            val char = line[i]
+            when (char) {
+                '"' -> insideQuotes = !insideQuotes
+                ',' -> if (insideQuotes) {
+                    builder.append(char)
+                } else {
+                    row.add(builder.toString().trim())
+                    builder.clear()
+                }
+                else -> builder.append(char)
+            }
+        }
+
+        row.add(builder.toString().trim())
+        return row
     }
 
     fun writeCSV(data: List<List<String>>) {
