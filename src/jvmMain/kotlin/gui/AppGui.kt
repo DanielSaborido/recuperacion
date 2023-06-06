@@ -1,5 +1,6 @@
 package gui
 
+import CSVFileHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -17,11 +18,8 @@ import androidx.compose.ui.window.AwtWindow
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import java.awt.FileDialog
 import java.awt.Frame
-import javax.swing.JDialog
-import javax.swing.JFileChooser
-import OpArchivos
-import java.io.File
 
 internal fun AppGui() = application {
     val titleWindowIni = "Notas del curso: "
@@ -49,14 +47,12 @@ internal fun AppGui() = application {
         FrameWindow(
             isDirectoryChooserOpen,
             directoryPath = directoryPath,
-            onCloseDirectoryChooser = { directory: String? -> //Cuando se elige en archivo.
-                folderContent = OpArchivos.calcPromedios(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
-                textProcesed+="Promedio de número hasta primera linea: ${folderContent[0]}\n" +
-                        "Promedio de número hasta bingo [${folderContent[1]}]\n" +
-                        "Promedio de Lineas por partida [${folderContent[2]}]\n" +
-                        "Carton con mas Bingos cantados [${folderContent[3]}]\n" +
-                        "Carton con mas Lineas cantadas [${folderContent[4]}]"
-                println(textProcesed)
+            onCloseDirectoryChooser = { directory: String -> //Cuando se elige en archivo.
+                //folderContent = OpArchivos.calcPromedios(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
+                folderContent = listOf(CSVFileHandler(directory).readCSV())
+                folderContent.forEach { it->
+                    println(it)
+                }
             },
             onClickSelectDirectory = { isDirectoryChooserOpen = true },
             textProcesed
@@ -66,11 +62,11 @@ internal fun AppGui() = application {
 
 @Composable
 internal fun FrameWindow(
-    isDirectoryChooserOpen: Boolean = false,
-    directoryPath: String = "",
-    onCloseDirectoryChooser: (directory: String?) -> Unit,
-    onClickSelectDirectory: () -> Unit,
-    textProcesed: String
+        isDirectoryChooserOpen: Boolean = false,
+        directoryPath: String = "",
+        onCloseDirectoryChooser: (String) -> Unit,
+        onClickSelectDirectory: () -> Unit,
+        textProcesed: String
 ) {
     MaterialTheme {
         if (isDirectoryChooserOpen)
@@ -138,26 +134,20 @@ internal fun FrameWindow(
 
 @Composable
 internal fun DirectoryChooser(
-    parent: Frame? = null,
-    onCloseDirectoryChooser: (directory: String?) -> Unit
-) = AwtWindow(
-    create = {
-        object : JDialog(parent, "Elige la carpeta con los csv", true) {
-            override fun setVisible(value: Boolean) {
-                val fileChooser = JFileChooser()
-                fileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                val result = fileChooser.showDialog(this, "Seleccionar")
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    val selectedFile = fileChooser.selectedFile
-                    onCloseDirectoryChooser(selectedFile.absolutePath)
-                } else {
-                    onCloseDirectoryChooser(null)
+        parent: Frame? = null,
+        onCloseDirectoryChooser: (String) -> Unit
+)  = AwtWindow(
+        create = {
+            object : FileDialog(parent, "Elige la carpeta con los csv", LOAD) {
+                override fun setVisible(value: Boolean) {
+                    super.setVisible(value)
+                    if (value) {
+                        onCloseDirectoryChooser(directory)
+                    }
                 }
-                dispose()
             }
-        }
-    },
-    dispose = JDialog::dispose
+        },
+        dispose = FileDialog::dispose
 )
 
 

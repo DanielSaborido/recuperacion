@@ -51,12 +51,9 @@ class CSVFileHandler(private val filePath: String) {
         }
     }
 
-    private fun modifyCSV(modifiedData: List<List<String>>) {
-        val originalData = readCSV()
-        val mergedData = mutableListOf<List<String>>()
-        mergedData.addAll(originalData)
-        mergedData.addAll(modifiedData)
-        writeCSV(mergedData)
+    fun modifyCSV(linea:MutableList<String>,campo: Int, text: String): String {
+        linea[campo] = "\"$text\""
+        return linea[campo]
     }
 
 }
