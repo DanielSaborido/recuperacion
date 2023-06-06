@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="tablas" uuid="1bb1359f-dab1-4272-9f26-ff93a9d816be">
+    <data-source source="LOCAL" name="default" uuid="3a4727aa-461e-4e13-8be5-3999c9c78d5b">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.h2.Driver</jdbc-driver>
-      <jdbc-url>jdbc:h2:tablas</jdbc-url>
+      <jdbc-url>jdbc:h2:./default</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

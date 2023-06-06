@@ -12,6 +12,7 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://mvnrepository.com/artifact/com.h2database/h2")
 }
 
 kotlin {
