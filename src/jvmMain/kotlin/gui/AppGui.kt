@@ -1,6 +1,5 @@
 package gui
 
-import CSVFileHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -20,13 +19,13 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import java.awt.FileDialog
 import java.awt.Frame
+import java.io.File
 
 internal fun AppGui() = application {
     val titleWindowIni = "Notas del curso: "
-    var isDirectoryChooserOpen by remember { mutableStateOf(false) } //Indica que se quiere abrir el FileChooser
+    var isFileChooserOpen by remember { mutableStateOf(false) } //Indica que se quiere abrir el FileChooser
     var titleWindow by remember { mutableStateOf(titleWindowIni) } //Titulo de la ventana
-    var directoryPath by remember { mutableStateOf("") } //Path al fichero que se está procesando
-    var isActiveProcess by remember { mutableStateOf(false) } //Activar o desactivar el menuItem  procesar
+    var filePath by remember { mutableStateOf("") } //Path al fichero que se está procesando
     var textProcesed by remember { mutableStateOf("") } //El texto a poner en el campo de procesado.
     var folderContent by remember { mutableStateOf(emptyList<(Any)>()) }
 
@@ -38,39 +37,41 @@ internal fun AppGui() = application {
         //MenuBar de la ventana
         MenuBar {
             Menu("Archivo") {
-                Item("Abrir", onClick = { isDirectoryChooserOpen = true })
-                Item("Procesar", onClick = { isActiveProcess = true })
+                Item("Abrir", onClick = { isFileChooserOpen = true })
                 Item("Salir", onClick = ::exitApplication)
             }
         }
         //El resto de la ventana
         FrameWindow(
-            isDirectoryChooserOpen,
-            directoryPath = directoryPath,
-            onCloseDirectoryChooser = { directory: String -> //Cuando se elige en archivo.
-                //folderContent = OpArchivos.calcPromedios(directory)//pendiente de modificar para leer los tres csv seleccionando solo el directorio(mirar el bingo)
-                folderContent = listOf(CSVFileHandler(directory).readCSV())
+            isFileChooserOpen = isFileChooserOpen,
+            filePath = filePath,
+            onCloseFileChooser = { directory: String ->
+                val file = File(directory)
+                val fileName = file.name
+                filePath = fileName // Actualizar el estado de directoryPath
+                folderContent = CSVFileHandler(fileName).readCSV()
                 folderContent.forEach { it->
                     println(it)
                 }
+                isFileChooserOpen = false
             },
-            onClickSelectDirectory = { isDirectoryChooserOpen = true },
-            textProcesed
+            onClickSelectFile = { isFileChooserOpen = true },
+            textProcesed = textProcesed
         )
     }
 }
 
 @Composable
 internal fun FrameWindow(
-        isDirectoryChooserOpen: Boolean = false,
-        directoryPath: String = "",
-        onCloseDirectoryChooser: (String) -> Unit,
-        onClickSelectDirectory: () -> Unit,
+        isFileChooserOpen: Boolean = false,
+        filePath: String,
+        onCloseFileChooser: (String) -> Unit,
+        onClickSelectFile: () -> Unit,
         textProcesed: String
 ) {
     MaterialTheme {
-        if (isDirectoryChooserOpen)
-            DirectoryChooser(onCloseDirectoryChooser = onCloseDirectoryChooser)
+        if (isFileChooserOpen)
+            fileChooser(onCloseDirectoryChooser = onCloseFileChooser)
         Box(
             modifier = Modifier.fillMaxSize()
                 .background(color = Color(180, 180, 180))
@@ -92,18 +93,18 @@ internal fun FrameWindow(
                         .horizontalScroll(stateHorizontal),
                     contentAlignment = Alignment.TopCenter
                 ){
-                    TextField( // Contiene el path+nombre del fichero leido
-                        value = directoryPath,
-                        onValueChange = { },
-                        label = { Text("Seleccione la carpeta con los csv") },
-                        placeholder = { Text("Carpeta no seleccionada") },
+                    TextField(
+                        value = filePath,
+                        onValueChange = {},
+                        label = { Text("Seleccione el archivo csv") },
+                        placeholder = { Text("Archivo no seleccionada") },
                         modifier = Modifier.padding(top = 10.dp, bottom = 100.dp)
                             .fillMaxSize().width(500.dp).fillMaxHeight(),
-                        leadingIcon = { //Icono del lapiz que funciona igual que la opción del menuItem Abrir
-                            IconButton(onClick = onClickSelectDirectory) {
+                        leadingIcon = {
+                            IconButton(onClick = onClickSelectFile) {
                                 Icon(
                                     imageVector = Icons.Filled.Create,
-                                    contentDescription = "Seleccione la carpeta con los csv"
+                                    contentDescription = "Seleccione el archivo csv"
                                 )
                             }
                         },
@@ -133,21 +134,21 @@ internal fun FrameWindow(
 }
 
 @Composable
-internal fun DirectoryChooser(
-        parent: Frame? = null,
-        onCloseDirectoryChooser: (String) -> Unit
-)  = AwtWindow(
-        create = {
-            object : FileDialog(parent, "Elige la carpeta con los csv", LOAD) {
-                override fun setVisible(value: Boolean) {
-                    super.setVisible(value)
-                    if (value) {
-                        onCloseDirectoryChooser(directory)
-                    }
+internal fun fileChooser(
+    parent: Frame? = null,
+    onCloseDirectoryChooser: (String) -> Unit
+) = AwtWindow(
+    create = {
+        object : FileDialog(parent, "Elige el archivo csv", LOAD) {
+            override fun setVisible(value: Boolean) {
+                super.setVisible(value)
+                if (value) {
+                    onCloseDirectoryChooser(file)
                 }
             }
-        },
-        dispose = FileDialog::dispose
+        }
+    },
+    dispose = FileDialog::dispose
 )
 
 
