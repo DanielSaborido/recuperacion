@@ -1,8 +1,8 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("multiplatform")
-    id("org.jetbrains.compose")
+    kotlin("multiplatform") version "1.8.10"
+    id("org.jetbrains.compose") version "1.4.0"
 }
 
 group = "com.example"
@@ -13,6 +13,7 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven("https://mvnrepository.com/artifact/com.h2database/h2")
+    maven("https://mvnrepository.com/artifact/de.m3y.kformat/kformat/0.9")
 }
 
 kotlin {
@@ -24,6 +25,9 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation("com.h2database:h2:1.4.200")
+                implementation("de.m3y.kformat:kformat:0.9")
+                implementation(kotlin("stdlib"))
             }
         }
         val jvmTest by getting
